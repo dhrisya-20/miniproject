@@ -1,0 +1,85 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Home Page - Library Management System</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+
+  <style>
+    body {
+      background-image: url("{% static 'images/library-bg.jpg' %}");
+      background-size: cover;
+      background-repeat: no-repeat;
+      background-position: center;
+      min-height: 100vh;
+    }
+
+    .overlay {
+      background: rgba(255,255,255,0.92);
+      border-radius: 12px;
+      padding: 2rem;
+    }
+
+    .navbar-brand { font-weight: 700; }
+  </style>
+</head>
+<body>
+
+  <!-- Navigation Bar -->
+  <nav class="navbar navbar-expand-lg navbar-dark bg-primary shadow-sm">
+    <div class="container">
+      <a class="navbar-brand" href="#">📚 Library System</a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
+              aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+
+      <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav ms-auto">
+          <li class="nav-item"><a class="nav-link" href="{% url 'admin_login' %}">Admin Login</a></li>
+          <li class="nav-item"><a class="nav-link" href="{% url 'user_register' %}">User Register</a></li>
+          <li class="nav-item"><a class="nav-link" href="{% url 'browse_books' %}">Browse Books</a></li>
+          <li class="nav-item"><a class="nav-link" href="{% url 'search_books' %}">Search Books</a></li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Main Content -->
+  <main class="d-flex align-items-center justify-content-center py-5">
+    <div class="container">
+      <div class="mx-auto overlay" style="max-width:720px;">
+        <h1 class="text-center mb-3">Welcome to the Library Management System</h1>
+        <p class="lead text-center mb-4">
+          An easy-to-use platform to manage books, members, and lending — for admins and users alike.
+        </p>
+
+        <div class="row g-2 justify-content-center">
+          <div class="col-auto">
+            <a href="{% url 'user_register' %}" class="btn btn-success">Register as User</a>
+          </div>
+          <div class="col-auto">
+            <a href="{% url 'admin_login' %}" class="btn btn-outline-primary">Admin Login</a>
+          </div>
+          <div class="col-12 mt-3">
+            <p class="text-center mb-0 small text-muted">
+              Admins can add/update books, authors, categories and track issues/returns. Users can browse, search, issue and return books.
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- Footer -->
+  <footer class="text-center py-3 text-white-50">
+    <div class="container">
+      <small>© 2025 Library Management System</small>
+    </div>
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
