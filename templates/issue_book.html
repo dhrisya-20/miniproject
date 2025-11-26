@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Issue Book</title>
+
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+
+<body class="bg-light">
+
+<div class="container mt-5 col-md-6">
+  <div class="card shadow-sm p-4">
+    <h3 class="text-center mb-4">📖 Issue a Book</h3>
+
+    <!-- Messages -->
+    {% if messages %}
+      {% for message in messages %}
+        <div class="alert alert-{{ message.tags|default:'info' }} alert-dismissible fade show" role="alert">
+          {{ message }}
+          <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+      {% endfor %}
+    {% endif %}
+
+    <!-- Issue Form -->
+    <form method="post" action="{% url 'user_issue' %}">
+      {% csrf_token %}
+      
+      <div class="mb-3">
+        <label class="form-label">Select Book</label>
+        <select name="book_id" class="form-select" required>
+          <option value="">-- Choose a Book --</option>
+
+          {# Case A: view sent a 'books' queryset -> list them and, if view also provided 'book', preselect it #}
+          {% if books %}
+            {% for b in books %}
+              <option value="{{ b.id }}"
+                {% if book and book.id|stringformat:"s" == b.id|stringformat:"s" %} selected {% endif %}>
+                {{ b.title }}
+              </option>
+            {% endfor %}
+
+          {# Case B: view sent only a single 'book' (when ?book_id=...) -> show that as the single selected option #}
+          {% elif book %}
+            <option value="{{ book.id }}" selected>{{ book.title }}</option>
+
+          {# Fallback: no books and no book variable (shouldn't normally happen) #}
+          {% else %}
+            <option disabled>No books available</option>
+          {% endif %}
+        </select>
+      </div>
+
+      <button type="submit" class="btn btn-primary w-100">Issue Book</button>
+    </form>
+
+    <div class="text-center mt-3">
+      <a href="{% url 'user_dashboard' %}">Back to Dashboard</a>
+    </div>
+
+    <!-- BEGIN: My Issued Books -->
+    <div class="card mt-4">
+      <div class="card-body">
+        <h5 class="card-title mb-3">📘 My Issued Books</h5>
+
+        {% if my_issued %}
+          <div class="table-responsive">
+            <table class="table table-sm table-striped align-middle mb-0">
+              <thead class="table-light">
+                <tr>
+                  <th>#</th>
+                  <th>Title</th>
+                  <th>Author</th>
+                  <th>Issued On</th>
+                  <th>Return Date</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for rec in my_issued %}
+                  <tr>
+                    <td>{{ forloop.counter }}</td>
+                    <td>{{ rec.book.title }}</td>
+                    <td>{{ rec.book.author.name }}</td>
+                    <td>{{ rec.issue_date }}</td>
+                    <td>{{ rec.return_date|default:"—" }}</td>
+                    <td>
+                      {% if rec.return_date %}
+                        <span class="badge bg-success">Returned</span>
+                      {% else %}
+                        {# RETURN FORM: posts to same view (user_issue) with 'issue_id' #}
+                        <form method="post" action="{% url 'user_issue' %}" style="display:inline;">
+                          {% csrf_token %}
+                          <input type="hidden" name="issue_id" value="{{ rec.id }}">
+                          <button type="submit" class="btn btn-sm btn-outline-danger">Return</button>
+                        </form>
+                        <span class="ms-2 badge bg-danger">Issued</span>
+                      {% endif %}
+                    </td>
+                  </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        {% else %}
+          <div class="alert alert-info mb-0">You have not issued any books yet.</div>
+        {% endif %}
+      </div>
+    </div>
+    <!-- END: My Issued Books -->
+
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

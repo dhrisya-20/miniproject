@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Track Issues and Returns - Admin</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body class="bg-light">
+
+  <div class="container mt-5 mb-5">
+    <h2 class="text-center mb-4 text-success">📘 Track Book Issues and Returns</h2>
+
+    {% if issues %}
+      <div class="table-responsive">
+        <table class="table table-bordered table-hover align-middle text-center shadow-sm">
+          <thead class="table-dark">
+            <tr>
+              <th>Issue ID</th>
+              <th>Book Title</th>
+              <th>Issued To</th>
+              <th>Issue Date</th>
+              <th>Return Date</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for issue in issues %}
+              <tr>
+                <td>{{ forloop.counter }}</td>
+                <td>{{ issue.book.title }}</td>
+                <td>{{ issue.user.username }}</td>
+                <td>{{ issue.issue_date|date:"Y-m-d" }}</td>
+
+                {# Return date column #}
+                <td>
+                  {% if issue.return_date %}
+                    {{ issue.return_date|date:"Y-m-d" }}
+                  {% else %}
+                    <span class="text-muted">-</span>
+                  {% endif %}
+                </td>
+
+                {# Status column: prefer a model property 'status' or fallback to checking return_date #}
+                <td>
+                  {% if issue.status %}
+                    {# if you implemented a status property/string on the model #}
+                    {% if issue.status == "Returned" %}
+                      <span class="badge bg-success">Returned</span>
+                    {% elif issue.status == "Overdue" %}
+                      <span class="badge bg-danger">Overdue</span>
+                    {% else %}
+                      <span class="badge bg-warning text-dark">{{ issue.status }}</span>
+                    {% endif %}
+                  {% else %}
+                    {# fallback: use return_date to decide #}
+                    {% if issue.return_date %}
+                      <span class="badge bg-success">Returned</span>
+                    {% else %}
+                      <span class="badge bg-warning text-dark">Issued</span>
+                    {% endif %}
+                  {% endif %}
+                </td>
+
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    {% else %}
+      <div class="alert alert-info text-center shadow-sm">
+        No issue or return records found.
+      </div>
+    {% endif %}
+
+    <div class="text-center mt-4">
+      <a href="{% url 'admin_dashboard' %}" class="btn btn-secondary">
+         Back to Dashboard
+      </a>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

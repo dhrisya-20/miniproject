@@ -1,0 +1,192 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Manage Members - Admin</title>
+
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+
+  <style>
+    .modal-backdrop { z-index: 1040 !important; }
+    .modal { z-index: 1050 !important; }
+    .modal-content { background: #fff; color: #212529; border-radius: .5rem; }
+    .modal-title { color: #0b5ed7; font-weight: 600; }
+    .form-label { color: #212529; font-weight: 500; }
+    .td-address { max-width: 320px; white-space: normal; word-break: break-word; }
+    .td-phone { white-space: nowrap; }
+    .table-responsive { overflow-x: auto; }
+  </style>
+</head>
+<body class="bg-light">
+
+  <div class="container mt-5 mb-5">
+    <h2 class="text-center mb-4 text-success">Manage Members</h2>
+
+    {% if messages %}
+      <div class="mb-3">
+        {% for message in messages %}
+          <div class="alert alert-{{ message.tags|default:'info' }} alert-dismissible fade show" role="alert">
+            {{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+          </div>
+        {% endfor %}
+      </div>
+    {% endif %}
+
+    {% if members %}
+      <div class="table-responsive shadow-sm">
+        <table class="table table-bordered align-middle mb-0">
+          <thead class="table-dark">
+            <tr>
+              <th style="width:6%;">SL</th>
+              <th>Name</th>
+              <th>Email</th>
+              <th style="width:14%;">Phone</th>
+              <th>Address</th>
+              <th style="width:12%;">Registered On</th>
+              <th style="width:18%;" class="text-center">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for member in members %}
+              <tr>
+                {# Serial number (1,2,3...) so table looks continuous even if DB ids skip #}
+                <td>{{ forloop.counter }}</td>
+
+                <td>{{ member.get_full_name|default:member.username }}</td>
+
+                <td>{{ member.email }}</td>
+
+                <td class="td-phone">
+                  {% if member.member and member.member.phone %}
+                    {{ member.member.phone }}
+                  {% else %}
+                    &mdash;
+                  {% endif %}
+                </td>
+
+                <td class="td-address">
+                  {% if member.member and member.member.address %}
+                    {{ member.member.address }}
+                  {% else %}
+                    &mdash;
+                  {% endif %}
+                </td>
+
+                <td>{{ member.date_joined|date:"Y-m-d" }}</td>
+
+                <td class="text-center">
+                  <!-- Edit button opens modal specific to this member -->
+                  <button type="button" class="btn btn-sm btn-primary me-1"
+                          data-bs-toggle="modal" data-bs-target="#editModal-{{ member.id }}">
+                    Edit
+                  </button>
+
+                  <!-- Delete posts to same view -->
+                  <form method="post" action="{% url 'manage_members' %}" class="d-inline">
+                    {% csrf_token %}
+                    <input type="hidden" name="action" value="delete">
+                    <input type="hidden" name="member_id" value="{{ member.id }}">
+                    <button type="submit" class="btn btn-sm btn-danger"
+                            onclick="return confirm('Delete member {{ member.get_full_name|default:member.username }}?');">
+                      Delete
+                    </button>
+                  </form>
+                </td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+
+      {% if is_paginated %}
+        <nav class="mt-3" aria-label="Members pages">
+          <ul class="pagination justify-content-center">
+            {% if page_obj.has_previous %}
+              <li class="page-item"><a class="page-link" href="?page={{ page_obj.previous_page_number }}">Previous</a></li>
+            {% else %}
+              <li class="page-item disabled"><span class="page-link">Previous</span></li>
+            {% endif %}
+            <li class="page-item disabled"><span class="page-link">Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span></li>
+            {% if page_obj.has_next %}
+              <li class="page-item"><a class="page-link" href="?page={{ page_obj.next_page_number }}">Next</a></li>
+            {% else %}
+              <li class="page-item disabled"><span class="page-link">Next</span></li>
+            {% endif %}
+          </ul>
+        </nav>
+      {% endif %}
+
+    {% else %}
+      <div class="alert alert-info text-center">No members found.</div>
+    {% endif %}
+
+    <div class="text-center mt-4">
+      <a href="{% url 'admin_dashboard' %}" class="btn btn-secondary">Back to Dashboard</a>
+    </div>
+  </div>
+
+  {# EDIT MODALS - one modal per member #}
+  {% for member in members %}
+    <div class="modal fade" id="editModal-{{ member.id }}" tabindex="-1" aria-hidden="true"
+         data-bs-backdrop="static" data-bs-keyboard="false">
+      <div class="modal-dialog modal-lg modal-dialog-centered">
+        <form method="post" action="{% url 'manage_members' %}" class="modal-content">
+          {% csrf_token %}
+          <div class="modal-header">
+            <h5 class="modal-title">Edit Member — {{ member.get_full_name|default:member.username }}</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+
+          <div class="modal-body">
+            <input type="hidden" name="action" value="edit">
+            <input type="hidden" name="member_id" value="{{ member.id }}">
+
+            <!-- Full Name -->
+            <div class="mb-3">
+              <label class="form-label">Username</label>
+              <input type="text" name="username" class="form-control"
+                value="{{ member.username }}" required>
+
+            </div>
+
+            <!-- Email -->
+            <div class="mb-3">
+              <label class="form-label">Email</label>
+              <input type="email" name="email" class="form-control" value="{{ member.email }}" required>
+            </div>
+
+            <!-- Phone -->
+            <div class="mb-3">
+              <label class="form-label">Phone Number</label>
+              <input type="text" name="phone" class="form-control" value="{% if member.member %}{{ member.member.phone|default:'' }}{% endif %}">
+            </div>
+
+            <!-- Address -->
+            <div class="mb-3">
+              <label class="form-label">Address</label>
+              <textarea name="address" class="form-control" rows="3">{% if member.member %}{{ member.member.address|default:'' }}{% endif %}</textarea>
+            </div>
+
+            <!-- Active -->
+            <div class="form-check mb-2">
+              <input class="form-check-input" type="checkbox" id="is_active_{{ member.id }}" name="is_active"
+                     {% if member.is_active %}checked{% endif %}>
+              <label class="form-check-label" for="is_active_{{ member.id }}">Active</label>
+            </div>
+          </div>
+
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+            <button type="submit" class="btn btn-primary">Save changes</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  {% endfor %}
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
