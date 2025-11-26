@@ -1,128 +1,162 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Manage Books - Admin Panel</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin - Manage Books</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
 </head>
 <body class="bg-light">
 
-  <div class="container mt-5">
-    <h2 class="text-center mb-4 text-primary fw-bold">📚 Manage Books</h2>
+<div class="container mt-5 mb-5">
 
-    <!-- Messages -->
-    {% if messages %}
-      {% for message in messages %}
-        <div class="alert alert-{{ message.tags|default:'info' }} alert-dismissible fade show" role="alert">
-          {{ message }}
-          <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-        </div>
-      {% endfor %}
-    {% endif %}
+  <h2 class="text-center text-primary mb-4">📚 Manage Books</h2>
 
-    <!-- Add New Book Form -->
-    <div class="card mb-4 shadow-sm">
-      <div class="card-header bg-primary text-white fw-semibold">Add New Book</div>
-      <div class="card-body">
-        <form method="post" action="{% url 'admin_books' %}">
-          {% csrf_token %}
-
-          <div class="row mb-3">
-            <div class="col-md-6">
-              <label for="title" class="form-label fw-semibold">Title</label>
-              <input type="text" name="title" id="title" class="form-control" placeholder="Enter book title" required>
-            </div>
-
-            <div class="col-md-6">
-              <label for="author" class="form-label fw-semibold">Author</label>
-              <select name="author" id="author" class="form-select" required>
-                <option value="">-- Select Author --</option>
-                {% for author in authors %}
-                  <option value="{{ author.id }}">{{ author.name }}</option>
-                {% endfor %}
-              </select>
-            </div>
-          </div>
-
-          <div class="row mb-3">
-            <div class="col-md-6">
-              <label for="category" class="form-label fw-semibold">Category</label>
-              <select name="category" id="category" class="form-select">
-                <option value="">-- Select Category --</option>
-                {% for category in categories %}
-                  <option value="{{ category.id }}">{{ category.name }}</option>
-                {% endfor %}
-              </select>
-            </div>
-
-            <div class="col-md-6">
-              <label class="form-label fw-semibold">Availability</label>
-              <select name="is_available" class="form-select" required>
-                <option value="True">Available</option>
-                <option value="False">Not Available</option>
-              </select>
-            </div>
-          </div>
-
-          <button type="submit" class="btn btn-success w-100">Add Book</button>
-        </form>
+  {% if messages %}
+    {% for message in messages %}
+      <div class="alert alert-{{ message.tags|default:'info' }} alert-dismissible fade show">
+        {{ message }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
       </div>
-    </div>
+    {% endfor %}
+  {% endif %}
 
-    <!-- Book List -->
-    <div class="card shadow-sm">
-      <div class="card-header bg-secondary text-white fw-semibold">Existing Books</div>
-      <div class="card-body p-0">
-        {% if books %}
-          <div class="table-responsive">
-            <table class="table table-striped table-hover mb-0 align-middle">
-              <thead class="table-dark">
-                <tr>
-                  <th>ID</th>
-                  <th>Title</th>
-                  <th>Author</th>
-                  <th>Category</th>
-                  <th>Available</th>
-                  <th class="text-center">Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                {% for book in books %}
-                  <tr>
-                    <td>{{ book.id }}</td>
-                    <td>{{ book.title }}</td>
-                    <td>{{ book.author.name }}</td>
-                    <td>{{ book.category.name|default:"—" }}</td>
-                    <td>
-                      {% if book.is_available %}
-                        <span class="badge bg-success">Yes</span>
-                      {% else %}
-                        <span class="badge bg-danger">No</span>
-                      {% endif %}
-                    </td>
-                    <td class="text-center">
-                      <a href="{% url 'edit_book' book.id %}" class="btn btn-sm btn-warning">Edit</a>
-                      <a href="{% url 'delete_book' book.id %}" class="btn btn-sm btn-danger"
-                         onclick="return confirm('Are you sure you want to delete this book?');">Delete</a>
-                    </td>
-                  </tr>
-                {% endfor %}
-              </tbody>
-            </table>
-          </div>
+  <!-- Add / Edit Form -->
+  <div class="card shadow-sm mb-4">
+    <div class="card-body">
+      <h5 class="text-success mb-3">{% if edit_book %}Edit Book{% else %}Add New Book{% endif %}</h5>
+      <form method="post" action="{% url 'manage_books' %}">
+        {% csrf_token %}
+
+        {% if edit_book %}
+          <input type="hidden" name="action" value="edit">
+          <input type="hidden" name="book_id" value="{{ edit_book.id }}">
         {% else %}
-          <p class="text-center p-3 mb-0">No books available in the library.</p>
+          <input type="hidden" name="action" value="add">
         {% endif %}
-      </div>
-    </div>
 
-    <div class="text-center mt-4">
-      <a href="{% url 'admin_dashboard' %}" class="btn btn-secondary">← Back to Admin Dashboard</a>
-    </div>
+        <div class="row g-3">
+          <div class="col-md-6">
+            <label class="form-label">Title</label>
+            <input type="text" name="title" class="form-control" required
+                   value="{% if edit_book %}{{ edit_book.title }}{% endif %}" placeholder="Enter book title">
+          </div>
 
+          <div class="col-md-6">
+            <label class="form-label">Author</label>
+            <input type="text" name="author" class="form-control" required
+                   value="{% if edit_book %}{{ edit_book.author.name }}{% endif %}" placeholder="Enter author name">
+          </div>
+
+          <div class="col-md-6">
+            <label class="form-label">Category</label>
+            <input type="text" name="category" class="form-control" required
+                   value="{% if edit_book %}{{ edit_book.category.name }}{% endif %}" placeholder="Enter category name">
+          </div>
+
+          <div class="col-md-6">
+            <label class="form-label">ISBN</label>
+            <input type="text" name="isbn" class="form-control"
+                   value="{% if edit_book %}{{ edit_book.isbn }}{% endif %}" placeholder="Enter ISBN">
+          </div>
+
+          <div class="col-md-6">
+            <label class="form-label">Publisher</label>
+            <input type="text" name="publisher" class="form-control"
+                   value="{% if edit_book %}{{ edit_book.publisher }}{% endif %}" placeholder="Enter publisher name">
+          </div>
+
+          <div class="col-md-6">
+            <label class="form-label">Publication Date</label>
+            <input type="date" name="publication_date" class="form-control"
+                   value="{% if edit_book and edit_book.publication_date %}{{ edit_book.publication_date }}{% endif %}">
+          </div>
+
+          <div class="col-md-6">
+            <label class="form-label">Total Copies</label>
+            <input type="number" name="total_copies" min="0" class="form-control"
+                   value="{% if edit_book %}{{ edit_book.total_copies }}{% else %}1{% endif %}">
+          </div>
+
+          <div class="col-md-6">
+            <label class="form-label">Available Copies</label>
+            <input type="number" name="available_copies" min="0" class="form-control"
+                   value="{% if edit_book %}{{ edit_book.available_copies }}{% else %}1{% endif %}">
+          </div>
+
+          <div class="col-12">
+            <label class="form-label">Description</label>
+            <textarea name="description" rows="3" class="form-control"
+                      placeholder="Write a short description">{% if edit_book %}{{ edit_book.description }}{% endif %}</textarea>
+          </div>
+
+          <div class="col-12 d-grid mt-2">
+            <button type="submit" class="btn btn-primary">{% if edit_book %}Save Changes{% else %}Add Book{% endif %}</button>
+          </div>
+        </div>
+      </form>
+    </div>
   </div>
 
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <!-- Book List Table -->
+  <div class="card shadow-sm">
+    <div class="card-body">
+      <h5 class="text-success mb-3">Book List</h5>
+      <div class="table-responsive">
+        <table class="table table-bordered align-middle">
+          <thead class="table-dark">
+            <tr>
+              <th>ID</th>
+              <th>Title</th>
+              <th>Author</th>
+              <th>Category</th>
+              <th>ISBN</th>
+              <th>Publisher</th>
+              <th>Published</th>
+              <th>Description</th>
+              <th>Available</th>
+              <th class="text-center">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for book in books %}
+            <tr>
+              <td>{{ book.id }}</td>
+              <td>{{ book.title }}</td>
+              <td>{{ book.author.name }}</td>
+              <td>{{ book.category.name }}</td>
+              <td>{{ book.isbn|default:"—" }}</td>
+              <td>{{ book.publisher|default:"—" }}</td>
+              <td>{{ book.publication_date|date:"Y-m-d"|default:"—" }}</td>
+              <td>{{ book.description|truncatewords:10|default:"—" }}</td>
+              <td>{{ book.available_copies }}/{{ book.total_copies }}</td>
+              <td class="text-center">
+                <a href="{% url 'manage_books' %}?edit={{ book.id }}" class="btn btn-sm btn-warning">Edit</a>
+                <form method="post" action="{% url 'manage_books' %}" class="d-inline">
+                  {% csrf_token %}
+                  <input type="hidden" name="action" value="delete">
+                  <input type="hidden" name="book_id" value="{{ book.id }}">
+                  <button type="submit" class="btn btn-sm btn-danger"
+                          onclick="return confirm('Delete {{ book.title }}?');">Delete</button>
+                </form>
+              </td>
+            </tr>
+            {% empty %}
+            <tr><td colspan="10" class="text-center">No books found.</td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <div class="text-center mt-4">
+    <a href="{% url 'admin_dashboard' %}" class="btn btn-secondary">← Back to Dashboard</a>
+  </div>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

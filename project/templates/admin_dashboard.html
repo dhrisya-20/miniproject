@@ -12,7 +12,7 @@
   <!-- Navigation Bar -->
   <nav class="navbar navbar-expand-lg navbar-dark bg-dark shadow-sm">
     <div class="container">
-      <a class="navbar-brand fw-bold" href="#">📘 Admin Panel</a>
+      <a class="navbar-brand fw-bold" href="#">📘 Admin Dashboard</a>
       <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
               aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
         <span class="navbar-toggler-icon"></span>
@@ -57,17 +57,13 @@
         </a>
       </div>
       <div class="col-md-4 col-sm-6">
-        <a href="{% url 'track_issues' %}" class="btn btn-outline-danger w-100 py-3 fs-5">
+        <a href="{% url 'admin_issues' %}" class="btn btn-outline-danger w-100 py-3 fs-5">
           📖 Track Issues / Returns
         </a>
       </div>
     </div>
   </div>
 
-  <!-- Footer -->
-  <footer class="text-center mt-5 py-3 text-muted small">
-    © 2025 Library Management System — Admin Panel
-  </footer>
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>

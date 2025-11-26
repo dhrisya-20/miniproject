@@ -16,9 +16,18 @@ class AuthorAdmin(admin.ModelAdmin):
 # Book Admin
 @admin.register(Book)
 class BookAdmin(admin.ModelAdmin):
-    list_display = ('id', 'title', 'author', 'category', 'is_available')
-    list_filter = ('category', 'is_available')
-    search_fields = ('title', 'author__name')
+    list_display = (
+        'id',
+        'title',
+        'author',
+        'category',
+        'isbn',
+        'publisher',
+        'publication_date',
+        'is_available'
+    )
+    list_filter = ('category',)
+    search_fields = ('title', 'author__name', 'isbn', 'publisher')
 
 # Member Admin
 @admin.register(Member)
@@ -29,9 +38,10 @@ class MemberAdmin(admin.ModelAdmin):
 # IssuedBook Admin
 @admin.register(IssuedBook)
 class IssuedBookAdmin(admin.ModelAdmin):
-    list_display = ('id', 'book', 'user', 'issue_date', 'return_date', 'status')
+    list_display = ('id', 'book', 'user', 'issue_date', 'return_date', 'status_display')
     list_filter = ('issue_date', 'return_date')
     search_fields = ('book__title', 'user__username')
 
-    def status(self, obj):
+    def status_display(self, obj):
         return "Returned" if obj.return_date else "Issued"
+    status_display.short_description = 'Status'

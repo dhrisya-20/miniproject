@@ -6,14 +6,14 @@
   <title>User Dashboard - Library System</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
 </head>
+
 <body class="bg-light">
 
   <!-- Navigation Bar -->
   <nav class="navbar navbar-expand-lg navbar-dark bg-success shadow-sm">
     <div class="container">
       <a class="navbar-brand fw-bold" href="#">📖 Library System</a>
-      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
-              aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
         <span class="navbar-toggler-icon"></span>
       </button>
 
@@ -30,8 +30,23 @@
     </div>
   </nav>
 
-  <!-- Dashboard Content -->
-  <div class="container mt-5">
+  <div class="container mt-4">
+
+    {% if overdue_warnings %}
+    <div class="alert alert-danger">
+      <h5>⚠ Overdue Book Alert!</h5>
+      <p>You have books that are not returned for more than <b>6 months</b>.</p>
+
+      <ul>
+        {% for b in overdue_warnings %}
+        <li>
+          <b>{{ b.book.title }}</b> — issued on {{ b.issue_date|date:"Y-m-d" }}
+        </li>
+        {% endfor %}
+      </ul>
+    </div>
+    {% endif %}
+
     <h2 class="text-center mb-4 text-success">Welcome to Your Dashboard</h2>
 
     {% if user.is_authenticated %}
@@ -40,31 +55,18 @@
 
     <div class="row text-center g-4">
       <div class="col-md-3 col-sm-6">
-        <a href="{% url 'browse_books' %}" class="btn btn-outline-primary w-100 py-3">
+        <a href="{% url 'user_browse' %}" class="btn btn-outline-primary w-100 py-3">
           📚 <br> Browse Books
         </a>
       </div>
       <div class="col-md-3 col-sm-6">
-        <a href="{% url 'search_books' %}" class="btn btn-outline-success w-100 py-3">
-          🔍 <br> Search Books
-        </a>
-      </div>
-      <div class="col-md-3 col-sm-6">
-        <a href="{% url 'issue_book' %}" class="btn btn-outline-warning w-100 py-3">
+        <a href="{% url 'user_issue' %}" class="btn btn-outline-warning w-100 py-3">
           📥 <br> Issue Book
         </a>
       </div>
-      <div class="col-md-3 col-sm-6">
-        <a href="{% url 'return_book' %}" class="btn btn-outline-danger w-100 py-3">
-          📤 <br> Return Book
-        </a>
-      </div>
     </div>
-  </div>
 
-  <footer class="text-center mt-5 py-3 text-muted small">
-    &copy; {{ now.year }} Library Management System. All Rights Reserved.
-  </footer>
+  </div>
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>

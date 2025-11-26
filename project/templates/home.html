@@ -9,32 +9,59 @@
 
   <style>
     body {
-        
-      background: url('https://images.unsplash.com/photo-1524995997946-a1c2e315a42f?auto=format&fit=crop&w=1600&q=80') no-repeat center center fixed;  
+      background: url('https://images.unsplash.com/photo-1524995997946-a1c2e315a42f?auto=format&fit=crop&w=1600&q=80') no-repeat center center fixed;
       background-size: cover;
-      background-repeat: no-repeat;
-      background-position: center;
       min-height: 100vh;
       color: #fff;
+      font-family: "Segoe UI", sans-serif;
     }
 
-    .card {
-      background: rgba(255, 255, 255, 0.9);
-      border: none;
-      border-radius: 12px;
-    }
-
+    /* Navbar Beautified */
     .navbar {
-      background-color: rgba(3, 9, 16, 0.9);
+      background: rgba(0, 0, 0, 0.85) !important;
+      backdrop-filter: blur(6px);
+      padding: 12px 0;
     }
 
+    .navbar-brand {
+      font-size: 1.5rem;
+      letter-spacing: 1px;
+    }
+
+    .nav-link {
+      font-size: 1.1rem;
+      padding: 8px 15px;
+      border-radius: 6px;
+      transition: 0.3s;
+    }
+
+    .nav-link:hover {
+      background: rgba(255, 255, 255, 0.2);
+    }
+
+    /* Main Title Styling */
     h1 {
-      color: #05090f;
-      font-weight: bold;
+      color: #fff;
+      font-weight: 700;
+      text-shadow: 0 3px 10px rgba(0, 0, 0, 0.7);
+      margin-top: 40px;
     }
 
+    /* Smooth content box (optional aesthetic) */
+    .content-box {
+      background: rgba(0, 0, 0, 0.55);
+      backdrop-filter: blur(4px);
+      padding: 40px;
+      border-radius: 16px;
+      max-width: 900px;
+      margin: auto;
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.5);
+    }
+
+    /* Footer */
     footer {
-      color: #fff;
+      font-size: 0.9rem;
+      letter-spacing: 0.5px;
     }
   </style>
 </head>
@@ -42,7 +69,7 @@
 <body>
 
   <!-- Navigation Bar -->
-  <nav class="navbar navbar-expand-lg navbar-dark bg-primary shadow-sm">
+  <nav class="navbar navbar-expand-lg navbar-dark shadow-sm">
     <div class="container">
       <a class="navbar-brand fw-bold" href="#">📚 Library System</a>
       <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
@@ -53,9 +80,8 @@
       <div class="collapse navbar-collapse" id="navbarNav">
         <ul class="navbar-nav ms-auto">
           <li class="nav-item"><a class="nav-link" href="{% url 'admin_login' %}">Admin Login</a></li>
-          <li class="nav-item"><a class="nav-link" href="{% url 'user_register' %}">Register</a></li>
-          <li class="nav-item"><a class="nav-link" href="{% url 'browse_books' %}">Browse Books</a></li>
-          <li class="nav-item"><a class="nav-link" href="{% url 'search_books' %}">Search Books</a></li>
+          <li class="nav-item"><a class="nav-link" href="{% url 'user_login' %}">User Login</a></li>
+          <li class="nav-item"><a class="nav-link" href="{% url 'user_browse' %}">Browse Books</a></li>
         </ul>
       </div>
     </div>
@@ -63,25 +89,17 @@
 
   <!-- Main Content -->
   <div class="container mt-5 text-center">
-    <h1 class="mb-4">Welcome to the Library Management System</h1>
+    <div class="content-box">
+      <h1 class="mb-4">Welcome to the Library Management System</h1>
 
-    <div class="card mx-auto shadow-lg p-4" style="max-width: 650px;">
-      <div class="card-body text-dark">
-        <p class="card-text fs-5">
-          This is an integrated platform designed to manage a modern library efficiently.
-        </p>
-        <p class="card-text text-start">
-          <strong>📘 Admins:</strong> Add, update, and manage books, authors, categories, and members.<br>
-          <strong>👩‍💻 Users:</strong> Browse available books, search by title or author, register, issue, and return books easily.
-        </p>
-        <a href="{% url 'user_register' %}" class="btn btn-success me-2 mt-2">Register as User</a>
-        <a href="{% url 'admin_login' %}" class="btn btn-outline-light mt-2">Admin Login</a>
-      </div>
+      {% block content %}
+      <!-- Page-specific content will be injected here -->
+      {% endblock %}
     </div>
   </div>
 
   <!-- Footer -->
-  <footer class="text-center mt-5 py-3 bg-dark bg-opacity-75">
+  <footer class="text-center py-3 bg-dark bg-opacity-75 text-white fixed-bottom">
     <p class="mb-0">© 2025 Library Management System</p>
   </footer>
 

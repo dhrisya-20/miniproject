@@ -27,10 +27,12 @@
           <tbody>
             {% for issue in issues %}
               <tr>
-                <td>{{ issue.id }}</td>
+                <td>{{ forloop.counter }}</td>
                 <td>{{ issue.book.title }}</td>
                 <td>{{ issue.user.username }}</td>
                 <td>{{ issue.issue_date|date:"Y-m-d" }}</td>
+
+                {# Return date column #}
                 <td>
                   {% if issue.return_date %}
                     {{ issue.return_date|date:"Y-m-d" }}
@@ -38,13 +40,28 @@
                     <span class="text-muted">-</span>
                   {% endif %}
                 </td>
+
+                {# Status column: prefer a model property 'status' or fallback to checking return_date #}
                 <td>
-                  {% if issue.is_returned %}
-                    <span class="badge bg-success">Returned</span>
+                  {% if issue.status %}
+                    {# if you implemented a status property/string on the model #}
+                    {% if issue.status == "Returned" %}
+                      <span class="badge bg-success">Returned</span>
+                    {% elif issue.status == "Overdue" %}
+                      <span class="badge bg-danger">Overdue</span>
+                    {% else %}
+                      <span class="badge bg-warning text-dark">{{ issue.status }}</span>
+                    {% endif %}
                   {% else %}
-                    <span class="badge bg-warning text-dark">Issued</span>
+                    {# fallback: use return_date to decide #}
+                    {% if issue.return_date %}
+                      <span class="badge bg-success">Returned</span>
+                    {% else %}
+                      <span class="badge bg-warning text-dark">Issued</span>
+                    {% endif %}
                   {% endif %}
                 </td>
+
               </tr>
             {% endfor %}
           </tbody>
@@ -58,7 +75,7 @@
 
     <div class="text-center mt-4">
       <a href="{% url 'admin_dashboard' %}" class="btn btn-secondary">
-        ← Back to Dashboard
+         Back to Dashboard
       </a>
     </div>
   </div>
