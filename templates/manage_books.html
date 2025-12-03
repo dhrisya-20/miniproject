@@ -245,6 +245,36 @@
   </div>
 </div>
 <script>
+  const pubDateInput = document.querySelector('publication_date');
+
+function checkFutureDate() {
+    if (!pubDateInput) return;
+
+    const selectedDate = new Date(pubDateInput.value);
+    const today = new Date();
+    today.setHours(0, 0, 0, 0); // Remove time for clean comparison
+
+    if (selectedDate > today) {
+        submitBtn.disabled = true;
+        submitBtn.setAttribute('aria-disabled', 'true');
+        submitBtn.title = "Publication date cannot be in the future.";
+    } else {
+        // Restore based on copies validation
+        checkAndToggle();
+
+        if (submitBtn.title === "Publication date cannot be in the future.") {
+            submitBtn.removeAttribute('title');
+        }
+    }
+}
+
+if (pubDateInput) {
+    pubDateInput.addEventListener('change', checkFutureDate);
+    pubDateInput.addEventListener('input', checkFutureDate);
+
+    // Run on first load
+    checkFutureDate();
+}
   document.addEventListener('DOMContentLoaded', function () {
     // find elements
     const totalInput = document.querySelector('input[name="total_copies"]');

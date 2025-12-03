@@ -68,12 +68,7 @@ def admin_dashboard(request):
 
 
 def manage_books(request):
-    """
-    Full manage_books view:
-    - handles add / edit / delete
-    - on edit validation failure, renders template with submitted values and disable_submit=True
-    - on GET with ?edit=, computes disable_submit from the record
-    """
+
     def parse_int(value, default=1):
         try:
             return int(value)
@@ -119,7 +114,7 @@ def manage_books(request):
                     temp.publication_date = None
                 temp.description = request.POST.get('description', '').strip()
                 temp.total_copies = parse_int(request.POST.get('total_copies'), default=1)
-                temp.available_copies = parse_int(request.POST.get('available_copies'), default=1)
+                temp.available_copies = parse_int(request.POST.get('available_copies', default=1))
 
                 context = {
                     'books': books_qs,
@@ -145,6 +140,34 @@ def manage_books(request):
                 pub_date = datetime.strptime(date_str, '%Y-%m-%d').date() if date_str else None
             except (ValueError, TypeError):
                 pub_date = None
+
+            # <<< ADDED: check publication date not in future (edit)
+            if pub_date:
+                today = datetime.today().date()
+                if pub_date > today:
+                    messages.error(request, "Publication date cannot be in the future.", extra_tags="publication")
+                    # create temp object to re-populate the form (so user doesn't lose input)
+                    temp = Book()  # not saved
+                    temp.id = book.id
+                    temp.title = title
+                    temp.author = author
+                    temp.category = category
+                    temp.isbn = request.POST.get('isbn', '').strip()
+                    temp.publisher = request.POST.get('publisher', '').strip()
+                    temp.description = request.POST.get('description', '').strip()
+                    temp.publication_date = pub_date
+                    temp.total_copies = parse_int(request.POST.get('total_copies'), default=1)
+                    temp.available_copies = parse_int(request.POST.get('available_copies'), default=1)
+
+                    context = {
+                        'books': books_qs,
+                        'edit_book': temp,
+                        'authors': authors_qs,
+                        'categories': categories_qs,
+                        'disable_submit': True,
+                    }
+                    return render(request, 'manage_books.html', context)
+            # <<< END ADDED
 
             # update model fields
             book.title = title
@@ -216,6 +239,14 @@ def manage_books(request):
             total_copies = parse_int(request.POST.get('total_copies'), default=1)
             available_copies = parse_int(request.POST.get('available_copies'), default=1)
 
+            # <<< ADDED: check publication date not in future (add)
+            if pub_date:
+                today = datetime.today().date()
+                if pub_date > today:
+                    messages.error(request, "Publication date cannot be in the future.", extra_tags="publication")
+                    return redirect('manage_books')
+            # <<< END ADDED
+
             if available_copies > total_copies:
                 messages.error(request, "Available copies cannot be greater than total copies.", extra_tags="available")
                 # Render the page so the user can see values (optional) — here we redirect to keep behavior consistent
@@ -276,6 +307,21 @@ def manage_books(request):
                                    extra_tags="available")
             except Exception:
                 disable_submit = False
+
+            # <<< ADDED: if stored publication_date is future, disable submit and show message
+            try:
+                if edit_book.publication_date:
+                    today = datetime.today().date()
+                    if edit_book.publication_date > today:
+                        disable_submit = True
+                        messages.error(request,
+                                       "Publication date for this record is in the future.",
+                                       extra_tags="publication")
+            except Exception:
+                # swallow parsing/comparison errors (keep existing disable_submit)
+                pass
+            # <<< END ADDED
+
         except Book.DoesNotExist:
             messages.error(request, 'Requested book to edit was not found.')
             edit_book = None
@@ -288,6 +334,7 @@ def manage_books(request):
         'disable_submit': disable_submit,
     }
     return render(request, 'manage_books.html', context)
+
 
 
 
